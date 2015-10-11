@@ -1,6 +1,6 @@
 using Distributions
 using DataFrames
-
+using Docile
 
 type CpGMethEstimate
     alpha::Float64
@@ -58,8 +58,6 @@ function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
   end
 end
 
-
-
 function getDCpGStatistic(cpg_meth_est1,cpg_meth_est2, sample_names)
     num_cpgs = length(cpg_meth_est1)
     differences = Any[]
@@ -83,7 +81,6 @@ function getDCpGStatistic(cpg_meth_est1,cpg_meth_est2, sample_names)
            estimatedDifferenceMean =Float64[],
            estimatedVariance       =Float64[]
     )
-
     for row in differences
         push!(outdf, row)
     end
@@ -127,6 +124,18 @@ function get_beta_parametersPort(dat)
         return(params)
     end
 end
+
+"""
+ Estimate Alpha and Beta parameters of Beta Distribution given replicates
+
+ ### Arguments:
+     * `methcounts`:  Array  of replicate counts corresponding to methylated reads at CpG/Cytosine Position
+     * `totalcounts`: Array  of replicate counts corresponding to total coverage at CpG/Cytosine Position
+
+ ### Returns
+    * Floating Point Array [alpha,beta]
+
+"""
 
 function get_beta_parameters(methcounts,totalcounts)
     num_reps = length(methcounts)
