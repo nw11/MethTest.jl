@@ -7,6 +7,6 @@ include("hyper-geometric.jl")
 
 export get_beta_parameters
 export getDCpGStatistic
-include("beta-binomial.jl")
+include("beta-binomial-z.jl")
 
 end # module
