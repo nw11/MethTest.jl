@@ -45,6 +45,10 @@ end
   Right sided Fisher's Test using HypthesisTests' FisherExactTest
 =#
 function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
-    FE=FisherExactTest(meth_a, unmeth_a, meth_b, unmeth_b)
+    try
+        FE=FisherExactTest(meth_a, unmeth_a, meth_b, unmeth_b)
+    catch e
+         error("Caught error: $e. counts: $meth_a, $unmeth_a, $meth_b, $unmeth_b")
+    end
     return pvalue(FE, tail=:right)
 end
