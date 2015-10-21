@@ -45,6 +45,7 @@ end
   Right sided Fisher's Test using HypthesisTests' FisherExactTest
 =#
 function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
+    FE=nothing
     try
         FE=FisherExactTest(meth_a, unmeth_a, meth_b, unmeth_b)
     catch e
