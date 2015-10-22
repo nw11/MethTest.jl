@@ -42,12 +42,22 @@ end
 
 
 #=
-  Right sided Fisher's Test using HypthesisTests' FisherExactTest
+
+Uses the right sided Fisher's Test using HypthesisTests' FisherExactTest
+
+
+       | Cond A | Cond B
+---------------------------
+  meth |   a     |  b
+unmeth |   c     |  d
+
+Test whether a/c == b/d using FisherExactTest(a,b,c,d)
+
 =#
 function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
     FE=nothing
     try
-        FE=FisherExactTest(meth_a, unmeth_a, meth_b, unmeth_b)
+        FE=FisherExactTest(meth_a, meth_b, unmeth_a, unmeth_b)
     catch e
          error("Caught error: $e. counts: $meth_a, $unmeth_a, $meth_b, $unmeth_b")
     end
