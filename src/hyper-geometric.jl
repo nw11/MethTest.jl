@@ -43,18 +43,22 @@ end
 
 #=
 
-Uses the right sided Fisher's Test using HypthesisTests' FisherExactTest
+test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
 
+Uses the right sided Fisher's Test using HypthesisTests' FisherExactTest
 
        | Cond A | Cond B
 ---------------------------
   meth |   a     |  b
 unmeth |   c     |  d
 
-Test whether a/c == b/d using FisherExactTest(a,b,c,d)
+Test whether a/c == b/d using FisherExactTest(a,b,c,d) - so we have
+ FisherExactTest(A_meth,B_meth,A_unmeth,B_unmeth)
+
+Use the one sided test since our alternative is that A is greater than B.
 
 =#
-function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
+function test_greater_population_fisher(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
     FE=nothing
     try
         FE=FisherExactTest(meth_a, meth_b, unmeth_a, unmeth_b)
@@ -62,4 +66,20 @@ function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b; ci=false )
          error("Caught error: $e. counts: $meth_a, $unmeth_a, $meth_b, $unmeth_b")
     end
     return pvalue(FE, tail=:right)
+end
+
+#=
+ The same as above, except, when the FisherTest is instantiated, it calculates a value
+ that we don't want it too in the interest of speed. We only want the p value for the
+ one sided test, so steal this from the HypothesisTests package
+=#
+
+function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b)
+     a = meth_a
+     b = meth_b
+     c = unmeth_a
+     d = unmeth_b
+     p = pvalue(Hypergeometric(a + b, c + d, a + c), a, tail=:right)
+     p = max(min(p, 1.0), 0.0)
+     return p
 end
