@@ -1,6 +1,6 @@
 using GSL
 using HypothesisTests
-
+using Distributions
 #=
   This test below is a port from MethPipe methdiff package.
 
@@ -11,7 +11,8 @@ using HypothesisTests
   is added before calculating test_greater_population_s. Likely to avoid zero counts. If there
   are zero counts, this returns 1 - rather than error.
 
-  Currently I don't get values of a similar magnitude between the julia (and R)  based Fisher exact test
+  Currently, I don't get values of a similar magnitude between this implementation and the
+  Julia HypothesisTests (and R) based right sided Fisher's exact test
 =#
 
 function log_sum_log(p, q)
@@ -69,9 +70,9 @@ function test_greater_population_fisher(meth_a, unmeth_a, meth_b, unmeth_b; ci=f
 end
 
 #=
- The same as above, except, when the FisherTest is instantiated, it calculates a value
- that we don't want it too in the interest of speed. We only want the p value for the
- one sided test, so steal this from the HypothesisTests package
+ The same as above, except, when  HypothesisTest's FisherTest is instantiated it computes
+ the odss ratio that currently is compute intensive for counts > 100 or more. However,
+ we only want the p value for the one sided test - so steal this from the HypothesisTests package
 =#
 
 function test_greater_population(meth_a, unmeth_a, meth_b, unmeth_b)

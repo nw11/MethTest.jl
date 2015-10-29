@@ -17,6 +17,19 @@ type CpGMethEstimate
     unmethcounts::Array{Int64}
 end
 
+"""
+ CpGMethCount
+
+ Records the methylation counts in each replicate for a CpG position
+
+ methcounts:  array of methylated counts in replicates at CpG site
+ coverages:   array of coverage in replicates at CpG site
+"""
+type CpGMethCount
+    methcounts::Array{Int64}
+    coverages::Array{Int64}
+end
+
 function issame(array)
   for i=1:length(array)
      if array[i] != array[1]
@@ -151,6 +164,32 @@ function getDCpGStatistic(cpg_meth_est1,cpg_meth_est2, sample_names)
     return outdf
 end
 
+"""
+  getDCpGStatistics
+
+  Arguments:
+   * cond1_meth_counts: array of CpGMethCount objects
+   * cond2_meth_counts: array of CpGMethCount objects
+  Returns
+    DataFrame of statistics on differences of CpGs with Columns:
+    * significance
+    * credibilityIntervalMin
+    * credibilityIntervalMax
+    * estimatedDifferenceMean
+    * estimatedVariance
+"""
+function getDCpGStatistic( cond1_meth_counts::Array{CpGMethCount}, cond2_meth_counts::Array{CpGMethCount})
+    meth_ests_cond1 = Any[]
+    meth_ests_cond2 = Any[]
+    for i=1:length(cond1_meth_counts)
+         cpg_meth_est_cond1=get_beta_parameters(cond1_meth_counts[i].methcounts, cond1_meth_counts[i].coverages)
+         cpg_meth_est_cond2=get_beta_parameters(cond1_meth_counts[i].methcounts, cond1_meth_counts[i].coverages)
+         push!(meth_ests_cond1, cpg_meth_est_cond1)
+         push!(meth_ests_cond2, cpg_meth_est_cond2)
+    end
+    diff_cpg_stats = getDCpGStatistic(meth_ests_cond1,meth_ests_cond2,["A","B"])
+    return diff_cpg_stats
+end
 
 #expects vector size n=4, meth1,total1,meth2,total2
 function get_beta_parametersPort(dat)
@@ -272,7 +311,7 @@ end
 """
 
 function get_beta_parameters(methcounts,totalcounts)
-     beta_params=_get_beta_parameters(methcounts,totalcounts)
+     beta_params  = _get_beta_parameters(methcounts,totalcounts)
      unmethcounts = totalcounts - methcounts
      return CpGMethEstimate( beta_params[1], beta_params[2], methcounts, unmethcounts)
 end
