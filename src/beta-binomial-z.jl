@@ -45,8 +45,8 @@ end
 
  #### arguments
   a1: alpha of condition1
-  a2: alpha of condition2
   b1: beta of condition1
+  a2: alpha of condition2
   b2: beta of condition2
   nSamp: Number of samples to use
   alpha: Report credible interval 1-alpha
@@ -100,11 +100,11 @@ function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
           x1=alpha1+1
           x2=navg1+1
           # monte carlo approximation
-          println("monte carlo estimated BDI")
+          #println("monte carlo estimated BDI")
           return  computeBDI(alpha1,beta1,alpha2,beta2 )
       else
            #use standard normal to approximate BDI for n>=30
-           println("Normal estimated BDI")
+           #println("Normal estimated BDI")
            norm=Normal()
            mu=alpha1/(alpha1+beta1) - alpha2 / (alpha2+beta2)
            sigma= alpha1*beta1 / ( (alpha1+beta1)^2 * (alpha1+beta1+1) )
