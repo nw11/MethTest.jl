@@ -278,7 +278,7 @@ function _get_beta_parameters(methcounts,totalcounts)
          θ = ( 1 / maximum( totalcounts  ) )^2
     end
 
-    println("V = $V s2 = $s2")
+    #println("V = $V s2 = $s2")
 
     if(V < θ )
       M = 0
