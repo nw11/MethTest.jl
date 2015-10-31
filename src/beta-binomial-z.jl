@@ -211,7 +211,7 @@ function get_beta_parametersPort(dat)
         th=(1/maximum(dat[[2,4]]))^2
     end
 
-    println("V = $V s2 = $s2")
+    #println("V = $V s2 = $s2")
 
     if (V<th)
         M=0
