@@ -63,12 +63,22 @@ function computeBDI(a1,b1,a2,b2,nSamp=10000,alpha=0.1)
         throw(ArgumentError("alpha out of range"))
     end
     #monte carlo approximation
-    if(a1 <= 0 | b1 <= 0 | a2 <= 0 | b2 <= 0)
-       throw(ArgumentError("alpha out of range ($a1,$b1, $a2, $b2)"))
+    if(a1 <= 0 ) | ( b1 <= 0) | (a2 <= 0) | (b2 <= 0)
+       throw(ArgumentError("a or b out of range ($a1,$b1, $a2, $b2)"))
     end
 
-    beta1  = Beta(a1,b1)
-    beta2  = Beta(a2,b2)
+    beta1  = 0.0
+    beta2  = 0.0
+
+    try
+        beta1  = Beta(a1,b1)
+        beta2  = Beta(a2,b2)
+    catch e
+        println("a or b out of range ($a1,$b1, $a2, $b2)")
+        error(e)
+    end
+
+
     theta1 = rand(beta1,nSamp)
     theta2 = rand(beta2,nSamp)
     #calculate differences between two distributions
