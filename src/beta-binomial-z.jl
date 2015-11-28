@@ -1,9 +1,7 @@
 #=
   # Follows Ziller et al 2013.
-
   # There is a straight port of get_beta_parameters from the R code
   # This is called get_beta_parametersPort
-
 =#
 
 using Distributions
@@ -60,7 +58,7 @@ end
    v : stdev difference
 """
 
-function computeBDI(a1,b1,a2,b2,nSamp=100000,alpha=0.1)
+function computeBDI(a1,b1,a2,b2,nSamp=10000,alpha=0.1)
     if (alpha < 0) | (alpha > 1)
         throw(ArgumentError("alpha out of range"))
     end
@@ -91,8 +89,10 @@ end
 """
 function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
   na_found = all( x-> typeof(x) == nothing, [alpha1,beta1,navg1,alpha2,beta2,navg2])
-  if na_found
-      return( [nan, nan, nan, nan, nan] )
+  nan_found = any( x-> Base.isnan(x), [alpha1,beta1,navg1,alpha2,beta2,navg2])
+  if na_found | nan_found
+      #return( [nan, nan, nan, nan, nan] )
+      return([NaN,NaN,NaN,NaN,NaN])
   else
       a1=(alpha1+1)/(alpha1-1)-1
       b1=(beta1+1)/(beta1-1)-1
@@ -116,6 +116,40 @@ function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
   end
 end
 
+function getDCpGStatistic(cpg_meth_est1::CpGMethEstimate,cpg_meth_est2::CpGMethEstimate)
+    meth_level1 = cpg_meth_est1.alpha /  ( cpg_meth_est1.alpha + cpg_meth_est1.beta )
+    meth_level2 = cpg_meth_est2.alpha /  ( cpg_meth_est2.alpha + cpg_meth_est2.beta )
+    ave_cov1 = ( sum( cpg_meth_est1.methcounts) + sum( cpg_meth_est1.unmethcounts) ) /2
+    ave_cov2 = ( sum( cpg_meth_est2.methcounts) + sum( cpg_meth_est2.unmethcounts) ) /2
+    if meth_level1 <= meth_level2
+        difference = getBDI(cpg_meth_est1.alpha,cpg_meth_est1.beta,ave_cov1,
+                                     cpg_meth_est2.alpha,cpg_meth_est2.beta,ave_cov2)
+    else
+        difference = getBDI(cpg_meth_est2.alpha,cpg_meth_est2.beta,ave_cov2,
+                                     cpg_meth_est1.alpha,cpg_meth_est1.beta,ave_cov1)
+    end
+    return difference
+end
+
+function _getDCpGStatistic(cpg_meth_est1::Array{CpGMethEstimate},cpg_meth_est2::Array{CpGMethEstimate}, sample_names)
+    num_cpgs = length(cpg_meth_est1)
+    differences = Any[]
+    for i=1:num_cpgs
+        meth_level1 = cpg_meth_est1[i].alpha /  ( cpg_meth_est1[i].alpha + cpg_meth_est1[i].beta )
+        meth_level2 = cpg_meth_est2[i].alpha /  ( cpg_meth_est2[i].alpha + cpg_meth_est2[i].beta )
+        ave_cov1 = ( sum( cpg_meth_est1[i].methcounts) + sum( cpg_meth_est1[i].unmethcounts) ) /2
+        ave_cov2 = ( sum( cpg_meth_est2[i].methcounts) + sum( cpg_meth_est2[i].unmethcounts) ) /2
+        if meth_level1 <= meth_level2
+           push!(differences, getBDI(cpg_meth_est1[i].alpha,cpg_meth_est1[i].beta,ave_cov1,
+                                     cpg_meth_est2[i].alpha,cpg_meth_est2[i].beta,ave_cov2))
+        else
+           push!(differences, getBDI(cpg_meth_est2[i].alpha,cpg_meth_est2[i].beta,ave_cov2,
+                                     cpg_meth_est1[i].alpha,cpg_meth_est1[i].beta,ave_cov1) )
+        end
+    end
+    return differences
+end
+
 """
   getDCpGStatistic
 
@@ -135,7 +169,7 @@ end
            estimatedVariance         Float64[]
 
 """
-function getDCpGStatistic(cpg_meth_est1,cpg_meth_est2, sample_names)
+function getDCpGStatistic(cpg_meth_est1::Array{CpGMethEstimate},cpg_meth_est2::Array{CpGMethEstimate}, sample_names)
     num_cpgs = length(cpg_meth_est1)
     differences = Any[]
     for i=1:num_cpgs
