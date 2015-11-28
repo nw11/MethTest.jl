@@ -63,6 +63,10 @@ function computeBDI(a1,b1,a2,b2,nSamp=10000,alpha=0.1)
         throw(ArgumentError("alpha out of range"))
     end
     #monte carlo approximation
+    if(a1 <= 0 | b1 <= 0 | a2 <= 0 | b2 <= 0)
+       throw(ArgumentError("alpha out of range ($a1,$b1, $a2, $b2)"))
+    end
+
     beta1  = Beta(a1,b1)
     beta2  = Beta(a2,b2)
     theta1 = rand(beta1,nSamp)
