@@ -7,6 +7,7 @@
 using Distributions
 using DataFrames
 using Docile
+using Lumberjack
 
 type CpGMethEstimate
     alpha::Float64
@@ -183,7 +184,7 @@ end
            estimatedVariance         Float64[]
 
 """
-function getDCpGStatistic(cpg_meth_est1::Array{CpGMethEstimate},cpg_meth_est2::Array{CpGMethEstimate}, sample_names)
+function getDCpGStatistic(cpg_meth_est1::Array{CpGMethEstimate},cpg_meth_est2::Array{CpGMethEstimate}, sample_names;verbose=false)
     num_cpgs = length(cpg_meth_est1)
     differences = Any[]
     for i=1:num_cpgs
@@ -198,6 +199,13 @@ function getDCpGStatistic(cpg_meth_est1::Array{CpGMethEstimate},cpg_meth_est2::A
            push!(differences, getBDI(cpg_meth_est2[i].alpha,cpg_meth_est2[i].beta,ave_cov2,
                                      cpg_meth_est1[i].alpha,cpg_meth_est1[i].beta,ave_cov1) )
         end
+
+        if verbose
+            if i % 100 == 0
+                Lumberjack.info("processed $i CpGs")
+            end
+        end
+
     end
     outdf = DataFrame(
            significance              =Float64[],
