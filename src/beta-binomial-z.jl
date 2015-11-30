@@ -102,7 +102,7 @@ end
  getBDI
 
 """
-function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
+function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2;alpha=0.1,nSamp=10000)
   na_found = all( x-> typeof(x) == nothing, [alpha1,beta1,navg1,alpha2,beta2,navg2])
   nan_found = any( x-> Base.isnan(x), [alpha1,beta1,navg1,alpha2,beta2,navg2])
   if na_found | nan_found
@@ -116,7 +116,7 @@ function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
           x2=navg1+1
           # monte carlo approximation
           #println("monte carlo estimated BDI")
-          return  computeBDI(alpha1,beta1,alpha2,beta2 )
+          return  computeBDI(alpha1,beta1,alpha2,beta2,nSamp,alpha )
       else
            #use standard normal to approximate BDI for n>=30
            #println("Normal estimated BDI")
@@ -131,17 +131,17 @@ function getBDI(alpha1,beta1,navg1,alpha2,beta2,navg2,alpha=0.1)
   end
 end
 
-function getDCpGStatistic(cpg_meth_est1::CpGMethEstimate,cpg_meth_est2::CpGMethEstimate)
+function getDCpGStatistic(cpg_meth_est1::CpGMethEstimate,cpg_meth_est2::CpGMethEstimate;alpha=0.1,nSamp=10000)
     meth_level1 = cpg_meth_est1.alpha /  ( cpg_meth_est1.alpha + cpg_meth_est1.beta )
     meth_level2 = cpg_meth_est2.alpha /  ( cpg_meth_est2.alpha + cpg_meth_est2.beta )
     ave_cov1 = ( sum( cpg_meth_est1.methcounts) + sum( cpg_meth_est1.unmethcounts) ) /2
     ave_cov2 = ( sum( cpg_meth_est2.methcounts) + sum( cpg_meth_est2.unmethcounts) ) /2
     if meth_level1 <= meth_level2
         difference = getBDI(cpg_meth_est1.alpha,cpg_meth_est1.beta,ave_cov1,
-                                     cpg_meth_est2.alpha,cpg_meth_est2.beta,ave_cov2)
+                                     cpg_meth_est2.alpha,cpg_meth_est2.beta,ave_cov2,alpha,nSamp)
     else
         difference = getBDI(cpg_meth_est2.alpha,cpg_meth_est2.beta,ave_cov2,
-                                     cpg_meth_est1.alpha,cpg_meth_est1.beta,ave_cov1)
+                                     cpg_meth_est1.alpha,cpg_meth_est1.beta,ave_cov1,alpha,nSamp)
     end
     return difference
 end
